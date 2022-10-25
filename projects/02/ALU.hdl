@@ -61,5 +61,13 @@ CHIP ALU {
 
     Not16 (in=tempfxy, out=nottempfxy);
 
-    Mux16 (a=tempfxy, b=nottempfxy, sel=no, out=out);
+    Mux16 (a=tempfxy, b=nottempfxy, sel=no, out[15]=sign, out[0..7]=out07, out[8..15]=out815);
+
+    Or8Way (in=out07, out=or8way0);
+    Or8Way (in=out815, out=or8way1);
+    Or (a=or8way0, b=or8way1, out=or16way);
+    Mux (a=true, b=false, sel=or16way, out=zr);
+    Mux (a=false, b=true, sel=sign, out=ng);
+
+    Or16 (a[0..7]=out07, a[8..15]=false, b[0..7]=false, b[8..15]=out815, out=out);
 }
