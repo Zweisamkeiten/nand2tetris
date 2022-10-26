@@ -11,7 +11,7 @@
 // "white" in every pixel;
 // the screen should remain fully clear as long as no key is pressed.
   (START)
-    @255
+    @256
     D=A
     @maxrow
     M=D
@@ -25,6 +25,10 @@
       @FILL
       D;JGT // if KBD > 0: goto fill the screen
 
+      @state
+      D=M
+      @LOOP
+      D;JEQ // if cleared goto back to loop
       @KBD
       D=M
       @CLEAR
