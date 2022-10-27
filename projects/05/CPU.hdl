@@ -39,5 +39,53 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    // 地址指令与计算指令
+    Mux16 (a=instruction, b=aluout, sel=instruction[15], out=selectInsorALUout);
+    Not (in=instruction[15], out=ainstruction);
+    And (a=instruction[15], b=instruction[5], out=cinstructionloadA);
+    Or (a=ainstruction, b=cinstructionloadA, out=isloadA);
+    ARegister (in=selectInsorALUout, load=isloadA, out=outAr, out[0..14]=addressM);
+
+    And (a=instruction[15], b=instruction[4], out=isloadD);
+    DRegister (in=aluout, load=isloadD, out=outDr);
+
+    Mux16 (a=outAr, b=inM, sel=instruction[12], out=aluinM);
+    ALU (x=outDr, y=aluinM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=aluout, out=outM, zr=zr, ng=ng);
+
+    And (a=instruction[15], b=instruction[3], out=writeM);
+
+    DMux8Way (in=true, sel=instruction[0..2], a=j0, b=j1, c=j2, d=j3, e=j4, f=j5, g=j6, h=j7);
+    // null
+    And (a=j0, b=false, out=oj0);
+
+    // JGT
+    Or (a=zr, b=ng, out=zrorng);
+    Not (in=zrorng, out=notzrorng);
+    And (a=j1, b=notzrorng, out=oj1);
+
+    // JEQ
+    And (a=j2, b=zr, out=oj2);
+
+    // JGE
+    Not (in=ng, out=notng);
+    And (a=j3, b=notng, out=oj3);
+
+    // JLT
+    And (a=j4, b=ng, out=oj4);
+
+    // JNE
+    Not (in=zr, out=notzr);
+    And (a=j5, b=notzr, out=oj5);
+
+    // JLE
+    And (a=j6, b=zrorng, out=oj6);
+
+    // JMP
+    And (a=j7, b=true, out=oj7);
+
+    Or8Way (in[0]=oj0, in[1]=oj1, in[2]=oj2, in[3]=oj3, in[4]=oj4, in[5]=oj5, in[6]=oj6, in[7]=oj7, out=jump);
+    And (a=instruction[15], b=jump, out=isjump);
+
+    PC (in=outAr, load=isjump, inc=true, reset=reset, out[0..14]=pc);
+
 }
