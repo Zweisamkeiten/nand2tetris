@@ -27,5 +27,26 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    /* DMux (in=load, sel=address[14], a=r1, b=r2); */
+
+    /* RAM16K (in=in, load=r1, address=address[0..13], out=o0); */
+
+    /* DMux (in=r2, sel=address[13], a=r21, b=r22); */
+
+    /* DMux (in=r21, sel=address[12], a=r211, b=r212); */
+    /* RAM4K (in=in, load=r211, address=address[0..11], out=o1); */
+    /* RAM4K (in=in, load=r212, address=address[0..11], out=o2); */
+
+    /* Register (in=in, load=r22, out=o3); */
+    // first split to 4 * 8K
+    DMux4Way (in=load, sel=address[13..14], a=r0, b=r1, c=r2, d=r3);
+
+    Or (a=r0, b=r1, out=r16k);
+    RAM16K (in=in, load=r16k, address=address[0..13], out=o16k);
+
+    Screen (in=in, load=r2, address=address[0..12], out=outscreen);
+
+    Keyboard (out=outkbd);
+
+    Mux4Way16 (a=o16k, b=o16k, c=outscreen, d=outkbd, sel=address[13..14], out=out);
 }
